@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "bjut-minecraft-website",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-26",
+  "upload_source_maps": true,
+  "assets": {
+    "directory": "./public/",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bjut-mc-polls",
+      "database_id": "0739dd20-3afa-4076-a054-ec915d5c79f5",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

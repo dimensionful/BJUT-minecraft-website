@@ -1,10 +1,9 @@
 node_modules/
+.wrangler/
+.dev.vars
 npm-debug.log*
 .env
 .env.*
-data/votes.json
-data/*.tmp
-data/*.corrupt-*
 .DS_Store
 Thumbs.db
 *.log

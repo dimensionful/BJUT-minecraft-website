@@ -2,16 +2,23 @@
   "name": "bjut-minecraft-website",
   "version": "1.0.0",
   "private": true,
-  "description": "北京工业大学 Minecraft 社区服务器网站与统计后端",
-  "main": "server.js",
+  "description": "北京工业大学 Minecraft 社区服务器网站与 Cloudflare D1 统计后端",
+  "main": "worker.js",
   "scripts": {
-    "start": "node server.js"
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply bjut-mc-polls --remote",
+    "db:migrate:local": "wrangler d1 migrations apply bjut-mc-polls --local"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/dimensionful/BJUT-minecraft-website.git"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "wrangler": "^4.152.0"
   }
 }
