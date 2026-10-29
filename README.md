@@ -2,13 +2,13 @@
 
 北京工业大学 Minecraft 社区服务器网站：共享公告、版本与玩法统计、服务器状态。
 
-**线上地址：<https://bjutcraft.online>**
+**线上地址：<https://www.bjutcraft.online>**
 
 备用地址：<https://bjut-minecraft-website.waibi-babo.workers.dev>
 
 前端是纯 HTML / CSS / JS；统计后端运行在 **Cloudflare Workers**，数据存储在 **Cloudflare D1**，没有第三方前端依赖。
 
-`bjutcraft.online` 已通过 Cloudflare Custom Domain 绑定到 Worker。中国大陆网络若访问不到，先检查本地 DNS 是否仍缓存旧名称服务器，可临时改用 `223.5.5.5` / `119.29.29.29` 后刷新 DNS。
+`www.bjutcraft.online` 已通过 Cloudflare Custom Domain 绑定到 Worker，`bjutcraft.online` 会重定向到 `www`。中国大陆网络若访问不到，先检查本地 DNS 是否仍缓存旧名称服务器，可临时改用 `223.5.5.5` / `119.29.29.29` 后刷新 DNS。
 
 ![BJUT-MC 首页](preview/light-hero.png)
 

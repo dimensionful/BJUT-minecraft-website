@@ -122,7 +122,7 @@ async function queryMinecraftServer() {
     const response = await fetch(endpoint, {
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'BJUT-MC-Website/1.0 (+https://bjutcraft.online)'
+        'User-Agent': 'BJUT-MC-Website/1.0 (+https://www.bjutcraft.online)'
       },
       signal: controller.signal
     });
@@ -416,6 +416,11 @@ async function handleApi(request, env, url, ctx) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.hostname === 'bjutcraft.online') {
+      url.hostname = 'www.bjutcraft.online';
+      return Response.redirect(url.toString(), 308);
+    }
 
     if (url.pathname.startsWith('/api/')) {
       try {
