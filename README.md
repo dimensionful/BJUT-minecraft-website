@@ -14,7 +14,9 @@
 
 ![公告与统计](preview/dark-notices.png)
 
-> 预览截图中的票数为示例数据，实际统计从 0 开始。
+![服务器实时状态](preview/status-live.png)
+
+> 预览截图中的票数为示例数据，实际统计从 0 开始；服务器状态每 60 秒自动刷新。
 
 ## 功能
 
@@ -25,8 +27,10 @@
 - 每题最多选 2 项；选择「其它版本」后可自行填写版本名
 - 版本名最长 32 个字符，相同名称会合并统计
 - 匿名投票：HttpOnly Cookie 标识浏览器，同一浏览器再次提交会更新选择
-- 服务器状态区目前明确显示「暂无」已开放世界，不生成虚构数据
+- 服务器情况实时查询主世界在线人数、版本与在线状态
 - 响应式布局，适配桌面、平板和手机
+
+服务器状态由 Worker 请求 `api.mcsrvstat.us` 获取，数据源约 5 分钟缓存；页面每 60 秒刷新一次。
 
 ![自定义其它版本](preview/custom-version-card.png)
 
@@ -35,7 +39,9 @@
 ```text
 浏览器
   ├── 静态文件  →  Worker Assets (index.html / styles.css / script.js)
-  └── /api/*    →  Cloudflare Worker  →  D1 (SQLite)
+  └── /api/*    →  Cloudflare Worker
+                    ├── 投票  →  D1 (SQLite)
+                    └── 状态  →  api.mcsrvstat.us  →  Minecraft Server
 ```
 
 - `worker.js`：API 与静态资源入口
@@ -166,6 +172,30 @@ npm run deploy
 - 选择 `other-version` 时必须提供 1 至 32 个字符的版本名称
 - 成功后会返回该统计的最新状态
 
+### `GET /api/server-status`
+
+返回当前 Minecraft 服务器的实时状态。Worker 会缓存 20 秒，数据源 `api.mcsrvstat.us` 自身约缓存 5 分钟。
+
+```json
+{
+  "server": {
+    "name": "BJUT-MC 单世界",
+    "host": "world.bjutcraft.online",
+    "port": 21159,
+    "version": "26.3",
+    "world": "单世界"
+  },
+  "online": true,
+  "latencyMs": 356,
+  "version": { "name": "26.3", "protocol": 777 },
+  "players": { "online": 0, "max": 20 },
+  "motd": "A Minecraft Server",
+  "sourceUpdatedAt": "2026-10-29T08:33:51.000Z",
+  "source": "mcsrvstat.us",
+  "checkedAt": "2026-10-29T08:37:36.851Z"
+}
+```
+
 ### `GET /api/health`
 
 用于确认 Worker 与 D1 是否正常。
@@ -181,14 +211,15 @@ npx wrangler d1 execute bjut-mc-polls --remote --command="DELETE FROM votes"
 - 只使用随机生成的浏览器 ID，不采集姓名、学号或 IP 到数据表。
 - 用户填写的「其它版本」名称会公开展示在统计明细中，请勿填写个人信息。
 - 票数保存在 Cloudflare D1，不依赖本地文件。
+- 服务器状态查询会把服务器地址发送给 `api.mcsrvstat.us`。
 
-## 后续接入 MSPT
+## 后续接入 TPS / MSPT
 
-目前「服务器情况」明确显示暂无已开放世界，没有伪造在线数据。后续可由 Minecraft 服务端 mod 定时上报：
+在线人数与版本已经接入；实时 TPS 与每小时 MSPT 尚未接入。后续可由 Minecraft 服务端 mod 定时上报：
 
 1. 每次上报写入各服务器的 TPS、在线人数、每小时 MSPT 聚合值。
-2. 在 Worker 中增加服务器状态 API，并由前端轮询。
-3. 将状态区从空状态切换为多服务器列表。
+2. 在 Worker 中增加 TPS / MSPT 数据接口，并由前端轮询。
+3. 将状态区从单世界扩展为多服务器列表。
 
 ## License
 

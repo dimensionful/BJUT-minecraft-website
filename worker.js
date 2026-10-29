@@ -1,7 +1,15 @@
 /**
  * BJUT-MC · Cloudflare Worker
- * Static site + D1-backed polls.
+ * Static site + D1-backed polls + Minecraft server status.
  */
+
+const SERVER_INFO = {
+  name: 'BJUT-MC 单世界',
+  host: 'world.bjutcraft.online',
+  port: 21159,
+  version: '26.3',
+  world: '单世界'
+};
 
 const POLLS = {
   version: {
@@ -102,6 +110,94 @@ function parseOptions(value) {
   } catch (error) {
     return [];
   }
+}
+
+async function queryMinecraftServer() {
+  const endpoint = 'https://api.mcsrvstat.us/3/' + SERVER_INFO.host + ':' + SERVER_INFO.port;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  const startedAt = performance.now();
+
+  try {
+    const response = await fetch(endpoint, {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'BJUT-MC-Website/1.0 (+https://bjutcraft.online)'
+      },
+      signal: controller.signal
+    });
+
+    if (!response.ok) throw new Error('状态接口返回 ' + response.status);
+    const data = await response.json();
+    if (!data.online) throw new Error('服务器当前离线');
+
+    const players = data.players || {};
+    const protocol = data.protocol && typeof data.protocol === 'object' ? data.protocol : {};
+    const motd = Array.isArray(data.motd && data.motd.clean)
+      ? data.motd.clean.join(' ').trim()
+      : '';
+    const sourceUpdatedAt = data.debug && Number.isFinite(data.debug.cachetime)
+      ? new Date(data.debug.cachetime * 1000).toISOString()
+      : null;
+
+    return {
+      online: true,
+      latencyMs: Math.round(performance.now() - startedAt),
+      version: {
+        name: data.version || protocol.name || SERVER_INFO.version,
+        protocol: Number.isFinite(protocol.version) ? protocol.version : null
+      },
+      players: {
+        online: Number.isFinite(players.online) ? players.online : 0,
+        max: Number.isFinite(players.max) ? players.max : 0
+      },
+      motd,
+      sourceUpdatedAt,
+      source: 'mcsrvstat.us'
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+async function handleServerStatus(ctx) {
+  const cache = caches.default;
+  const cacheKey = new Request('https://status-cache.internal/api/server-status');
+  let cached;
+
+  try {
+    cached = await cache.match(cacheKey);
+  } catch (error) {}
+
+  if (cached) return cached;
+
+  const checkedAt = new Date().toISOString();
+  let payload;
+
+  try {
+    const result = await queryMinecraftServer();
+    payload = {
+      server: SERVER_INFO,
+      ...result,
+      checkedAt
+    };
+  } catch (error) {
+    payload = {
+      server: SERVER_INFO,
+      online: false,
+      checkedAt,
+      error: error.message || '无法连接服务器'
+    };
+  }
+
+  const response = json(payload, 200, {
+    'cache-control': 'public, max-age=20, s-maxage=20'
+  });
+
+  try {
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+  } catch (error) {}
+
+  return response;
 }
 
 function buildStats(pollId, rows, voterId) {
@@ -268,7 +364,12 @@ async function handleVote(request, env, pollId) {
   return response;
 }
 
-async function handleApi(request, env, url) {
+async function handleApi(request, env, url, ctx) {
+  if (url.pathname === '/api/server-status') {
+    if (request.method !== 'GET') return json({ error: 'Method Not Allowed' }, 405);
+    return handleServerStatus(ctx);
+  }
+
   if (url.pathname === '/api/health') {
     if (request.method !== 'GET') return json({ error: 'Method Not Allowed' }, 405);
 
@@ -313,12 +414,12 @@ async function handleApi(request, env, url) {
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
     if (url.pathname.startsWith('/api/')) {
       try {
-        return await handleApi(request, env, url);
+        return await handleApi(request, env, url, ctx);
       } catch (error) {
         console.error('[api]', error);
         return json({ error: '服务器内部错误' }, 500);
@@ -328,3 +429,4 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+

@@ -131,23 +131,24 @@
   var notices = {
     launch: {
       tag: '置顶公告',
-      date: '2026.10.26',
-      datetime: '2026-10-26',
-      title: '关于拟建设北京工业大学 Minecraft 服务器的公告',
-      lead: '我们拟建设一个面向北京工业大学玩家的 Minecraft 社区服务器，版本与玩法将结合公告区的统计结果确定。',
+      date: '2026.10.29',
+      datetime: '2026-10-29',
+      title: '关于 BJUT-MC 服务器开放运行的公告',
+      lead: 'BJUT-MC 单世界现已开放运行，版本 26.3。',
       body: [
         '<p>各位同学，大家好。</p>',
-        '<p>我们拟建设 <strong>BJUT-MC</strong>——一个面向北京工业大学玩家的 Minecraft 社区服务器。目前处于拟建设阶段，尚未开放。</p>',
-        '<h3>目前的计划</h3>',
+        '<p><strong>BJUT-MC 单世界现已开放运行</strong>，欢迎进入工大的方块世界。</p>',
+        '<h3>服务器信息</h3>',
         '<ul>',
-        '<li>公告由所有服务器共享，服务器状态集中展示。</li>',
-        '<li>首个世界的版本与玩法，先通过公告区的两项统计了解大家的需求。</li>',
-        '<li>每题最多选择 2 项，统计结果会作为后续建设依据。</li>',
+        '<li>地址：<strong>world.bjutcraft.online:21159</strong></li>',
+        '<li>版本：<strong>26.3</strong></li>',
+        '<li>当前架构：单世界</li>',
         '</ul>',
-        '<h3>仍在讨论</h3>',
-        '<p>服务端版本、网络接入、白名单、开放时间等均未确定。确定后会通过公告板发布。</p>',
-        '<div class="callout">欢迎先参与公告区的两项统计：想建怎样的服、你更想玩什么。</div>',
-        '<p class="dialog-signature">BJUT-MC 项目组<br><span>2026 年 10 月 26 日</span></p>'
+        '<p>在线人数、版本与延迟可以在网站「服务器情况」区域实时查看。</p>',
+        '<h3>后续规划</h3>',
+        '<p>当前只运行一个世界。版本与玩法统计仍会用于后续世界和活动规划，欢迎继续参与公告区的两项统计。</p>',
+        '<div class="callout">TPS 与每小时 MSPT 记录尚未接入，会在后续状态页更新中补充。</div>',
+        '<p class="dialog-signature">BJUT-MC 项目组<br><span>2026 年 10 月 29 日</span></p>'
       ].join('')
     }
   };
@@ -539,4 +540,192 @@
   });
 
   loadPollData();
+
+  /* Live Minecraft server status */
+
+  var statusNodes = {
+    overview: document.querySelector('[data-status-overview]'),
+    heading: document.querySelector('[data-status-heading]'),
+    summary: document.querySelector('[data-status-summary]'),
+    metrics: document.querySelector('[data-status-metrics]'),
+    checked: document.querySelector('[data-status-checked]'),
+    players: document.querySelector('[data-status-players]'),
+    max: document.querySelector('[data-status-max]'),
+    version: document.querySelector('[data-status-version]'),
+    latency: document.querySelector('[data-status-latency]'),
+    bar: document.querySelector('[data-status-bar]'),
+    motd: document.querySelector('[data-status-motd]'),
+    updated: document.querySelector('[data-status-updated]'),
+    header: document.querySelector('[data-header-state]'),
+    headerText: document.querySelector('[data-header-state-text]'),
+    hero: document.querySelector('[data-hero-status]'),
+    heroText: document.querySelector('[data-hero-status-text]'),
+    tag: document.querySelector('[data-status-tag]'),
+    tagText: document.querySelector('[data-status-tag-text]'),
+    serverState: document.querySelector('[data-server-state]'),
+    serverStateText: document.querySelector('[data-server-state-text]'),
+    serverDesc: document.querySelector('[data-server-desc]'),
+    serverVersion: document.querySelector('[data-server-version]'),
+    serverPlayers: document.querySelector('[data-server-players]'),
+    serverMax: document.querySelector('[data-server-max]'),
+    serverLatency: document.querySelector('[data-server-latency]'),
+    serverChecked: document.querySelector('[data-server-checked]')
+  };
+  var statusRefreshTimer = null;
+  var statusRequestInFlight = false;
+
+  function setNodeText(node, value) {
+    if (node) node.textContent = value;
+  }
+
+  function statusClock(value) {
+    var date = value ? new Date(value) : new Date();
+    if (!date || Number.isNaN(date.getTime())) return '—';
+    return date.toLocaleTimeString('zh-CN', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  function setStatusMode(online) {
+    if (statusNodes.overview) {
+      statusNodes.overview.classList.remove('is-loading');
+      statusNodes.overview.classList.toggle('is-online', online);
+      statusNodes.overview.classList.toggle('is-offline', !online);
+    }
+    if (statusNodes.metrics) {
+      statusNodes.metrics.classList.toggle('is-offline', !online);
+    }
+    if (statusNodes.header) {
+      statusNodes.header.classList.toggle('is-online', online);
+      statusNodes.header.classList.toggle('is-offline', !online);
+    }
+    if (statusNodes.hero) {
+      statusNodes.hero.classList.toggle('meta-value--online', online);
+      statusNodes.hero.classList.toggle('meta-value--amber', !online);
+    }
+    if (statusNodes.tag) {
+      statusNodes.tag.classList.toggle('is-live', online);
+    }
+    if (statusNodes.serverState) {
+      statusNodes.serverState.classList.toggle('state--green', online);
+      statusNodes.serverState.classList.toggle('state--amber', !online);
+    }
+  }
+
+  function renderOnlineStatus(data) {
+    var version = data.version && data.version.name ? data.version.name : '26.3';
+    var online = Math.max(0, Number(data.players && data.players.online) || 0);
+    var max = Math.max(0, Number(data.players && data.players.max) || 0);
+    var ratio = max > 0 ? Math.min(100, Math.round((online / max) * 100)) : 0;
+    var checked = statusClock(data.sourceUpdatedAt || data.checkedAt);
+    var latency = Number.isFinite(data.latencyMs) ? data.latencyMs + ' ms' : '—';
+    var motd = data.motd && data.motd !== 'A Minecraft Server'
+      ? data.motd
+      : 'world.bjutcraft.online:21159';
+
+    setStatusMode(true);
+    setNodeText(statusNodes.heading, '运行正常');
+    setNodeText(statusNodes.summary, '单世界运行中，版本 ' + version + '，当前在线 ' + online + ' / ' + max + ' 人。');
+    setNodeText(statusNodes.players, String(online));
+    setNodeText(statusNodes.max, '/ ' + max);
+    setNodeText(statusNodes.version, version);
+    setNodeText(statusNodes.latency, latency);
+    setNodeText(statusNodes.checked, checked);
+    setNodeText(statusNodes.motd, motd);
+    setNodeText(statusNodes.updated, '数据于 ' + checked);
+    setNodeText(statusNodes.headerText, '运行中');
+    setNodeText(statusNodes.heroText, '运行中');
+    setNodeText(statusNodes.tagText, '实时在线');
+    setNodeText(statusNodes.serverStateText, '运行中');
+    setNodeText(statusNodes.serverDesc, '版本 ' + version + ' · 单世界');
+    setNodeText(statusNodes.serverVersion, version);
+    setNodeText(statusNodes.serverPlayers, String(online));
+    setNodeText(statusNodes.serverMax, String(max));
+    setNodeText(statusNodes.serverLatency, latency);
+    setNodeText(statusNodes.serverChecked, checked);
+    if (statusNodes.bar) statusNodes.bar.style.width = ratio + '%';
+  }
+
+  function renderOfflineStatus(data) {
+    var checked = statusClock(data && data.checkedAt);
+    var version = data && data.server && data.server.version ? data.server.version : '26.3';
+
+    setStatusMode(false);
+    setNodeText(statusNodes.heading, '暂时无法连接');
+    setNodeText(statusNodes.summary, '暂时无法连接 world.bjutcraft.online:21159，状态会每 60 秒自动重试。');
+    setNodeText(statusNodes.players, '—');
+    setNodeText(statusNodes.max, '/ —');
+    setNodeText(statusNodes.version, version);
+    setNodeText(statusNodes.latency, '—');
+    setNodeText(statusNodes.checked, checked);
+    setNodeText(statusNodes.motd, 'world.bjutcraft.online:21159');
+    setNodeText(statusNodes.updated, '尝试于 ' + checked);
+    setNodeText(statusNodes.headerText, '离线');
+    setNodeText(statusNodes.heroText, '离线');
+    setNodeText(statusNodes.tagText, '连接失败');
+    setNodeText(statusNodes.serverStateText, '离线');
+    setNodeText(statusNodes.serverDesc, '单世界 · 查询失败');
+    setNodeText(statusNodes.serverVersion, version);
+    setNodeText(statusNodes.serverPlayers, '—');
+    setNodeText(statusNodes.serverMax, '—');
+    setNodeText(statusNodes.serverLatency, '—');
+    setNodeText(statusNodes.serverChecked, checked);
+    if (statusNodes.bar) statusNodes.bar.style.width = '0%';
+  }
+
+  function scheduleStatusRefresh() {
+    window.clearTimeout(statusRefreshTimer);
+    statusRefreshTimer = window.setTimeout(loadServerStatus, 60000);
+  }
+
+  function loadServerStatus() {
+    if (statusRequestInFlight) return;
+    if (document.hidden) {
+      scheduleStatusRefresh();
+      return;
+    }
+
+    statusRequestInFlight = true;
+    var controller = new AbortController();
+    var abortTimer = window.setTimeout(function () {
+      controller.abort();
+    }, 10000);
+
+    fetch('/api/server-status?t=' + Date.now(), {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+      signal: controller.signal
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('状态服务返回异常');
+        return response.json();
+      })
+      .then(function (data) {
+        if (data && data.online) {
+          renderOnlineStatus(data);
+        } else {
+          renderOfflineStatus(data);
+        }
+      })
+      .catch(function () {
+        renderOfflineStatus(null);
+      })
+      .finally(function () {
+        window.clearTimeout(abortTimer);
+        statusRequestInFlight = false;
+        scheduleStatusRefresh();
+      });
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) {
+      window.clearTimeout(statusRefreshTimer);
+      loadServerStatus();
+    }
+  });
+
+  loadServerStatus();
 })();

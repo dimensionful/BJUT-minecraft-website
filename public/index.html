@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BJUT-MC · 北京工业大学 Minecraft 社区服务器</title>
-  <meta name="description" content="BJUT-MC 是面向北京工业大学玩家的 Minecraft 社区服务器。查看拟建设公告、版本与玩法统计，以及服务器状态。">
+  <meta name="description" content="BJUT-MC 是面向北京工业大学玩家的 Minecraft 社区服务器。查看公告、版本与玩法统计，以及实时服务器状态。">
   <meta name="theme-color" content="#f4f6f0" id="theme-color">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <script>
@@ -51,7 +51,7 @@
       </nav>
 
       <div class="header-actions">
-        <span class="header-state"><i aria-hidden="true"></i>拟建设</span>
+        <span class="header-state is-online" data-header-state><i aria-hidden="true"></i><span data-header-state-text>运行中</span></span>
         <button class="icon-button" id="theme-toggle" type="button" aria-label="切换到深色模式" title="切换明暗主题">
           <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.5 8.5 0 1 0 20.2 15.2Z"/>
@@ -97,7 +97,7 @@
           </div>
           <div class="meta-item">
             <span class="meta-label">STATUS</span>
-            <span class="meta-value meta-value--amber"><i aria-hidden="true"></i>拟建设</span>
+            <span class="meta-value meta-value--online" data-hero-status><i aria-hidden="true"></i><span data-hero-status-text>运行中</span></span>
           </div>
         </div>
       </div>
@@ -232,10 +232,10 @@
             <span class="world-panel__year">2026</span>
           </div>
           <div class="world-panel__value">
-            <strong class="world-panel__empty">暂无</strong>
-            <span>已开放世界</span>
+            <strong>01</strong>
+            <span>个世界<br>运行中</span>
           </div>
-          <div class="world-panel__track" aria-hidden="true"><i style="width: 0"></i></div>
+          <div class="world-panel__track" aria-hidden="true"><i style="width: 100%"></i></div>
           <div class="world-panel__foot">
             <span>BJUT-MC</span>
             <span>JAVA</span>
@@ -249,7 +249,7 @@
         <div class="section-heading">
           <p class="section-kicker"><span aria-hidden="true"></span>NOTICE BOARD <b>·</b> 公告与统计</p>
           <h2 id="notice-title">公告</h2>
-          <p class="section-intro">一块公告板，所有世界共享。拟建设公告、版本意愿与玩法统计都在这里。</p>
+          <p class="section-intro">一块公告板，所有世界共享。服务器公告、版本意愿与玩法统计都在这里。</p>
         </div>
         <div class="section-aside" aria-label="共 3 项内容，公告与统计全服共享">
           <span class="section-number">03</span>
@@ -258,7 +258,7 @@
       </div>
 
       <div class="notices-grid">
-        <article class="notice notice--featured notice--wide reveal" data-notice="launch" tabindex="0" role="button" aria-haspopup="dialog" aria-label="阅读公告：关于拟建设北京工业大学 Minecraft 服务器的公告">
+        <article class="notice notice--featured notice--wide reveal" data-notice="launch" tabindex="0" role="button" aria-haspopup="dialog" aria-label="阅读公告：关于 BJUT-MC 服务器开放运行的公告">
           <div class="notice-head">
             <span class="tag tag--accent">
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
@@ -266,13 +266,13 @@
               </svg>
               置顶公告
             </span>
-            <time class="notice-date" datetime="2026-10-26">2026.10.26</time>
+            <time class="notice-date" datetime="2026-10-29">2026.10.29</time>
           </div>
 
           <div class="notice-copy">
-            <p class="notice-overline">ANNOUNCEMENT / 拟建设公告</p>
-            <h3>关于拟建设北京工业大学<br class="desktop-break">Minecraft 服务器的公告</h3>
-            <p class="notice-excerpt">拟建设面向工大玩家的 Minecraft 社区服务器。</p>
+            <p class="notice-overline">ANNOUNCEMENT / 开放公告</p>
+            <h3>关于 BJUT-MC 服务器<br class="desktop-break">开放运行的公告</h3>
+            <p class="notice-excerpt">单世界现已开放运行：world.bjutcraft.online:21159，版本 26.3。</p>
           </div>
 
           <span class="notice-icon" aria-hidden="true">
@@ -298,8 +298,8 @@
             <span class="tag tag--poll">意愿统计</span>
             <span class="poll-live"><i aria-hidden="true"></i>进行中</span>
           </div>
-          <h3>想建怎样的服？</h3>
-          <p class="poll-desc">选择你希望首个世界采用的版本，匿名统计，结果实时更新。</p>
+          <h3>后续想建怎样的服？</h3>
+          <p class="poll-desc">选择你希望后续世界采用的版本，匿名统计，结果实时更新。</p>
 
           <form class="poll-form" data-poll-form novalidate>
             <fieldset class="poll-fieldset">
@@ -408,41 +408,42 @@
       <div class="shell">
         <div class="section-head reveal">
           <div class="section-heading">
-            <p class="section-kicker"><span aria-hidden="true"></span>SERVER STATUS <b>·</b> 服务器状态</p>
+            <p class="section-kicker"><span aria-hidden="true"></span>SERVER STATUS <b>·</b> 实时状态</p>
             <h2 id="status-title">服务器情况</h2>
-            <p class="section-intro">所有服务器状态集中展示。当前尚未开放任何世界，开服后会在这里分别记录运行情况。</p>
+            <p class="section-intro">主世界状态实时查询。更多世界将根据统计结果规划。</p>
           </div>
           <div class="status-heading-meta">
-            <span class="preview-badge"><i aria-hidden="true"></i>状态预览</span>
-            <span class="updated-note">更新于 2026.10.26</span>
+            <span class="preview-badge preview-badge--live"><i aria-hidden="true"></i>实时状态</span>
+            <span class="updated-note" data-status-updated>正在同步</span>
           </div>
         </div>
 
-        <div class="status-overview reveal">
+        <div class="status-overview is-loading reveal" data-status-overview>
           <div class="overview-copy">
             <p class="status-eyebrow"><i class="status-pulse" aria-hidden="true"></i>整体状态</p>
-            <h3>拟建设中，尚未开放</h3>
-            <p>服务器尚未开放，当前暂无运行数据。开服后，服务器的可用率、在线人数与维护记录会在这里更新。</p>
+            <h3 data-status-heading>正在查询服务器…</h3>
+            <p data-status-summary>正在连接 world.bjutcraft.online:21159，请稍候。</p>
             <div class="overview-meta">
-              <span><i class="meta-square" aria-hidden="true"></i>暂无已开放世界</span>
-              <span><i class="meta-square" aria-hidden="true"></i>数据接入规划中</span>
+              <span><i class="meta-square" aria-hidden="true"></i><span data-status-world>BJUT-MC 单世界</span></span>
+              <span><i class="meta-square" aria-hidden="true"></i><span data-status-address>world.bjutcraft.online:21159</span></span>
             </div>
           </div>
-          <div class="rollout" aria-label="拟建设进度">
-            <div class="rollout-step is-current">
-              <i class="rollout-dot" aria-hidden="true"></i>
-              <div><strong>版本与玩法统计</strong><small>VERSION &amp; PLAYSTYLE</small></div>
-              <span class="rollout-state">进行中</span>
+
+          <div class="live-metrics" data-status-metrics aria-label="实时服务器数据">
+            <div class="live-metrics__head">
+              <span><i class="live-dot" aria-hidden="true"></i>LIVE STATUS</span>
+              <span data-status-checked>—</span>
             </div>
-            <div class="rollout-step">
-              <i class="rollout-dot" aria-hidden="true"></i>
-              <div><strong>服务器建设</strong><small>INFRASTRUCTURE</small></div>
-              <span class="rollout-state">待开始</span>
+            <div class="live-metrics__grid">
+              <div><span>在线玩家</span><strong><span data-status-players>—</span><small data-status-max>/ —</small></strong></div>
+              <div><span>服务器版本</span><strong data-status-version>26.3</strong></div>
+              <div><span>接口耗时</span><strong data-status-latency>—</strong></div>
+              <div><span>世界数量</span><strong>01</strong></div>
             </div>
-            <div class="rollout-step">
-              <i class="rollout-dot" aria-hidden="true"></i>
-              <div><strong>公开测试</strong><small>PUBLIC BETA</small></div>
-              <span class="rollout-state">待公布</span>
+            <div class="live-metrics__bar" aria-hidden="true"><i data-status-bar></i></div>
+            <div class="live-metrics__foot">
+              <span data-status-motd>world.bjutcraft.online:21159</span>
+              <span>60 秒刷新</span>
             </div>
           </div>
         </div>
@@ -450,27 +451,41 @@
         <div class="server-list-head reveal">
           <div>
             <h3>所有世界</h3>
-            <p>服务器状态：暂无。开服后会在这里按世界分别展示运行状态。</p>
+            <p>服务器状态：<span data-status-address-inline>world.bjutcraft.online:21159</span></p>
           </div>
-          <span class="server-list-empty-tag"><i aria-hidden="true"></i>暂无运行中的世界</span>
+          <span class="server-list-empty-tag is-live" data-status-tag><i aria-hidden="true"></i><span data-status-tag-text>实时查询</span></span>
         </div>
 
-        <div class="servers servers--empty reveal">
-          <div class="servers-empty">
-            <span class="empty-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="4" y="4" width="16" height="6" rx="1.5"/>
-                <rect x="4" y="14" width="16" height="6" rx="1.5"/>
-                <path d="M7.5 7h.01M7.5 17h.01M12 7h4M12 17h4"/>
-              </svg>
-            </span>
-            <div class="empty-copy">
-              <p class="empty-kicker">SERVER STATUS</p>
-              <h3>暂无</h3>
-              <p>当前没有已开放的服务器。开服后，服务器状态、在线人数与可用率会在这里按世界分别展示。</p>
+        <div class="servers servers--live reveal">
+          <article class="server-row server-row--live">
+            <div class="server-row__head">
+              <div class="server-identity">
+                <span class="server-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 3.2 20.4 8 12 12.8 3.6 8Z" fill="currentColor" opacity=".9"/>
+                    <path d="M3.6 8 12 12.8v8L3.6 16V8Z" fill="currentColor" opacity=".42"/>
+                    <path d="M20.4 8 12 12.8v8l8.4-4.8V8Z" fill="currentColor" opacity=".64"/>
+                    <path d="M12 3.2 20.4 8 12 12.8 3.6 8Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <div>
+                  <div class="server-name"><h3>单世界</h3><span>SINGLE WORLD</span></div>
+                  <p data-server-desc>版本 26.3 · 实时状态</p>
+                </div>
+              </div>
+              <dl class="server-facts">
+                <div><dt>地址</dt><dd class="server-address">world.bjutcraft.online:21159</dd></div>
+                <div><dt>版本</dt><dd data-server-version>26.3</dd></div>
+              </dl>
+              <span class="state state--green" data-server-state><i aria-hidden="true"></i><span data-server-state-text>查询中</span></span>
             </div>
-            <span class="empty-state"><i aria-hidden="true"></i>尚未开放</span>
-          </div>
+            <div class="server-live-meta">
+              <div><span>在线玩家</span><strong data-server-players>—</strong></div>
+              <div><span>最大人数</span><strong data-server-max>—</strong></div>
+              <div><span>接口耗时</span><strong data-server-latency>—</strong></div>
+              <div><span>最后检查</span><strong data-server-checked>—</strong></div>
+            </div>
+          </article>
         </div>
 
         <div class="future-card reveal">
@@ -480,13 +495,13 @@
             </svg>
           </span>
           <div class="future-copy">
-            <strong>运行数据即将接入</strong>
-            <p>开服后将展示实时 TPS、在线人数与可用率；每小时 MSPT 记录也在后续计划中。</p>
+            <strong>TPS / MSPT 监测规划中</strong>
+            <p>在线人数与版本已实时查询；实时 TPS 与每小时 MSPT 记录将在后续接入。</p>
           </div>
           <span class="future-tag">规划中</span>
         </div>
 
-        <p class="status-footnote">本页为服务器状态预览，当前暂无运行数据；开服后将接入实时状态。</p>
+        <p class="status-footnote">状态每 60 秒自动刷新；数据来自 mcsrvstat.us，可能缓存约 5 分钟。</p>
       </div>
     </section>
   </main>
